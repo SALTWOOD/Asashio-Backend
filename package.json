@@ -16,7 +16,9 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "rimraf dist && tsc",
+    "start": "node --enable-source-maps dist/index.js"
   },
   "dependencies": {
     "@tsconfig/node22": "^22.0.2",
