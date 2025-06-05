@@ -1,0 +1,29 @@
+{
+  "name": "asashio-backend",
+  "version": "1.0.0",
+  "description": "Backend for Asashio",
+  "homepage": "https://github.com/SALTWOOD/Asashio#readme",
+  "private": true,
+  "bugs": {
+    "url": "https://github.com/SALTWOOD/Asashio/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/SALTWOOD/Asashio.git"
+  },
+  "license": "MIT",
+  "author": "SALTWOOD",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@tsconfig/node22": "^22.0.2",
+    "@types/node": "^22.15.29",
+    "express": "^5.1.0",
+    "rimraf": "^6.0.1",
+    "typeorm": "^0.3.24",
+    "typescript": "^5.8.3"
+  }
+}
