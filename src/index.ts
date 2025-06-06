@@ -2,29 +2,38 @@ import express from 'express';
 import { DataSource } from 'typeorm';
 import { Server } from 'socket.io';
 import http from 'http';
+import https from 'https';
+import { initRoutes } from './http/route.js';
+import { Config } from './config.js';
 
 const app = express();
-const server = http.createServer(app);
+
+// Initialize server
+let server;
+if (Config.instance.server.ssl.enabled) {
+    server = https.createServer({
+        key: Config.instance.server.ssl.key,
+        cert: Config.instance.server.ssl.cert
+    }, app);
+} else {
+    server = http.createServer(app);
+}
+
 const io = new Server(server);
 const db = new DataSource({
-    type: 'postgres',
+    type: 'mysql',
     host: 'localhost',
-    port: 5432,
-    username: 'postgres',
-    password: 'postgres',
+    port: 3306,
+    username: 'mysql',
+    password: 'mysql',
     database: 'asashio',
     entities: []
 });
 
-await db.initialize();
+// await db.initialize();
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+initRoutes(app, io, db);
 
-app.get('/', (req, res) => {
-    res.send('Hello World!');
-});
-
-server.listen(3000, () => {
-    console.log('Server is running on port 3000');
+server.listen(Config.instance.server.port, Config.instance.server.host, () => {
+    console.log(`Server running at http${Config.instance.server.ssl.enabled ? 's' : ''}://${Config.instance.server.host}:${Config.instance.server.port}`);
 });
