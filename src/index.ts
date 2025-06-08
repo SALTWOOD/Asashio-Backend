@@ -32,7 +32,7 @@ const db = new DataSource({
     password: Config.instance.database.password,
     database: 'asashio',
     entities: [Setting, UserInfo],
-    synchronize: Config.instance.database.synchronize as any
+    synchronize: Config.instance.database.synchronize
 });
 
 await db.initialize();
