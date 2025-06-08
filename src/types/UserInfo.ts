@@ -18,8 +18,15 @@ export class UserInfo {
     @Column()
     public role: Role = 'user';
 
-    @Column()
-    public two_factor = {
+    // 使用 JSON 类型并添加转换器
+    @Column({
+        type: 'json',
+        transformer: {
+            to: (value: TwoFactorAuth) => JSON.stringify(value),
+            from: (value: string) => JSON.parse(value)
+        }
+    })
+    public two_factor: TwoFactorAuth = {
         enabled: false,
         secret_totp: '',
         secret_webauthn: ''
@@ -27,4 +34,10 @@ export class UserInfo {
 
     @Column()
     public pwd_hash: string = '';
+}
+
+export interface TwoFactorAuth {
+    enabled: boolean;
+    secret_totp: string;
+    secret_webauthn: string;
 }
