@@ -30,7 +30,7 @@ const db = new DataSource({
     port: Config.instance.database.port,
     username: Config.instance.database.username,
     password: Config.instance.database.password,
-    database: 'asashio',
+    database: Config.instance.database.database,
     entities: [Setting, UserInfo],
     synchronize: Config.instance.database.synchronize
 });
