@@ -1,4 +1,3 @@
-import { Hono, Next } from 'hono';
 import { getOidcOptions } from '../models/oidc-options.js';
 import { Config } from '../config.js';
 import { Audience, ReturnMessage, UserStatus } from '../types/Enums.js';
@@ -8,7 +7,6 @@ import { AppError } from '../types/AppError.js';
 import { ServerConfig } from './server-config.js';
 import { ContentfulStatusCode } from 'hono/utils/http-status';
 import { applyToken, getUser, issueToken } from '../utils.js';
-import { Context } from 'hono/jsx';
 
 export function initRoutes(config: ServerConfig) {
     const app = config.hono;
