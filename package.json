@@ -16,7 +16,7 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node --enable-source-maps dist/test.js",
     "build": "rimraf dist && tsc",
     "start": "node --enable-source-maps dist/index.js"
   },
