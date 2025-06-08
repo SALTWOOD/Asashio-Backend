@@ -2,8 +2,9 @@ import { DataSource } from "typeorm";
 import JwtHelper from "./jwt.js";
 import { Request, Response } from "express";
 import { UserInfo } from "./types/UserInfo.js";
-import { Audience } from "./types/Enums.js";
+import { Audience, RoleLevels, UserStatus } from "./types/Enums.js";
 import { Config } from "./config.js";
+import { Role } from "./types/Enums.js";
 
 export function getToken(req: Request): string | null {
     return req.cookies.token || null;
@@ -49,10 +50,25 @@ export function createLoginToken(jwt: JwtHelper, res: Response, user: UserInfo, 
     return token;
 }
 
-export async function getUser(req: Request, jwt: JwtHelper, db: DataSource): Promise<UserInfo | null> {
+export async function getUser(req: Request, jwt: JwtHelper, db: DataSource, ignoreStatus: boolean = false): Promise<UserInfo | null> {
     const payload = jwt.verifyToken(getToken(req), Audience.USER) as { id: number };
     if (!payload) return null;
-    return db.manager.findOne(UserInfo, {
+    const user = await db.manager.findOne(UserInfo, {
         where: { id: payload.id }
     });
+    if (!user) return null;
+    if (ignoreStatus) return user;
+    if (user.status === UserStatus.DELETED) return null;
+    if (user.status === UserStatus.BANNED) throw new Error('User is banned');
+    return user;
+}
+
+/**
+ * 判断指定用户是否拥有指定或更高的权限
+ */
+export function hasPermission(user: UserInfo | null, required: Role): boolean {
+    if (!user) return false;
+    const userLevel = RoleLevels[user.role];
+    const requiredLevel = RoleLevels[required];
+    return userLevel >= requiredLevel;
 }

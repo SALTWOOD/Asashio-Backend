@@ -19,3 +19,15 @@ export enum Role {
     USER = 'user',
     ADMIN = 'admin'
 }
+
+export const RoleLevels: Record<Role, number> = {
+    [Role.GUEST]: 0,
+    [Role.USER]: 1,
+    [Role.ADMIN]: 2
+};
+
+export enum UserStatus {
+    DELETED = 0,
+    NORMAL = 1,
+    BANNED = 2
+};

@@ -1,0 +1,15 @@
+import express from "express";
+import { DataSource } from "typeorm";
+import { NonceGenerator } from "../nonce.js";
+import JwtHelper from "../jwt.js";
+import { Server as SocketIOServer } from "socket.io";
+
+export interface ServerConfig {
+    express: express.Application;
+    database: DataSource;
+    jwt: JwtHelper;
+    io: SocketIOServer;
+    nonce_generators: {
+        deletion: NonceGenerator<{ userId: number }>;
+    };
+}

@@ -8,6 +8,14 @@ interface NonceData<T> {
 export class NonceGenerator<T> {
     private store: Map<string, NonceData<T>>;
     private defaultTTL: number;
+    private cleanupInterval: NodeJS.Timeout;
+
+    /**
+     * 获取当前存有的 Nonce
+     */
+    public get nonces(): T[] {
+        return Array.from(this.store.values()).map(record => record.data);
+    }
 
     /**
      * 创建 Nonce 生成器
@@ -17,7 +25,7 @@ export class NonceGenerator<T> {
         this.store = new Map();
         this.defaultTTL = defaultTTL;
 
-        setInterval(this.cleanupExpired.bind(this), 60 * 1000);
+        this.cleanupInterval = setInterval(this.cleanupExpired.bind(this), 60 * 1000);
     }
 
     /**
@@ -79,5 +87,31 @@ export class NonceGenerator<T> {
 
         const byteLength = length / 2;
         return randomBytes(byteLength).toString('hex');
+    }
+
+    /**
+     * 按照指定条件查找 Nonce
+     */
+    public find(condition: (data: T) => boolean): [string, T] | null {
+        for (const [nonce, record] of this.store) {
+            if (condition(record.data)) {
+                return [nonce, record.data];
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 判断 Nonce 是否存在
+     */
+    public exists(nonce: string): boolean {
+        return this.store.has(nonce);
+    }
+
+    /**
+     * 删除 Nonce
+     */
+    public delete(nonce: string): boolean {
+        return this.store.delete(nonce);
     }
 }

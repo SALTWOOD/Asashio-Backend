@@ -1,15 +1,39 @@
 import express from 'express';
-import { Server } from 'socket.io';
-import { DataSource } from 'typeorm';
 import { getOidcOptions } from '../models/oidc-options.js';
 import { Config } from '../config.js';
 import { Request, Response, NextFunction } from 'express';
-import { getUser, applyToken, issueToken } from '../utils.js';
-import { Audience, ReturnMessage } from '../types/Enums.js';
-import JwtHelper from '../jwt.js';
+import { getUser, applyToken, issueToken, hasPermission } from '../utils.js';
+import { Audience, ReturnMessage, Role, UserStatus } from '../types/Enums.js';
 import { compare, hash } from 'bcrypt';
 import { UserInfo } from '../types/UserInfo.js';
 import cookieParser from 'cookie-parser';
+import { ServerConfig } from './server-config.js';
+import { AppError } from '../types/AppError.js';
+
+function getErrorHandler(config: ServerConfig) {
+    return async (error: Error, req: Request, res: Response, next: NextFunction) => {
+        const isAppError = error instanceof AppError;
+        const statusCode = isAppError ? error.statusCode : 500;
+        const data = isAppError ? error.data : null;
+
+        let sendStack = false;
+        // 都报错了还是保险些，加个 try
+        try {
+            const isDev = process.env.NODE_ENV === 'development';
+            const isAdmin = hasPermission(await getUser(req, config.jwt, config.database), Role.ADMIN);
+            if (isDev || isAdmin) sendStack = true;
+        } catch (e) {
+            sendStack = false;
+        }
+
+        // 统一响应格式
+        res.status(statusCode).json({
+            message: error.message,
+            data,
+            stack: sendStack ? error.stack : undefined
+        });
+    };
+}
 
 export function initRoutes(config: ServerConfig) {
     const app = config.express;

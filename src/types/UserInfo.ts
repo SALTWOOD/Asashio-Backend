@@ -1,5 +1,5 @@
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
-import { Role } from "./Enums.js";
+import { Role, UserStatus } from "./Enums.js";
 import { hash, hashSync } from "bcrypt";
 
 @Entity()
@@ -18,6 +18,9 @@ export class UserInfo {
 
     @Column()
     public role: Role = Role.USER;
+
+    @Column()
+    public status: UserStatus = UserStatus.NORMAL;
 
     // 使用 JSON 类型并添加转换器
     @Column({
