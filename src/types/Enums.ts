@@ -9,12 +9,6 @@ export enum ReturnMessage {
     ERROR = 'Error',
 }
 
-export const RoleLevels: Record<Role, number> = {
-    [Role.GUEST]: 0,
-    [Role.USER]: 1,
-    [Role.ADMIN]: 2
-};
-
 export enum Audience {
     USER = 'user-token'
 }
