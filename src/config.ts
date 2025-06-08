@@ -22,8 +22,8 @@ export class Config {
 
         ssl: {
             enabled: env.get('SSL_ENABLED').default(0).asBool(),
-            key: env.get('SSL_KEY').default('').asString(),
-            cert: env.get('SSL_CERT').default('').asString()
+            key: env.get('SSL_KEY_FILE').default('').asString(),
+            cert: env.get('SSL_CERT_FILE').default('').asString()
         }
     };
 

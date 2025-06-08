@@ -1,4 +1,3 @@
-import express from 'express';
 import { DataSource, In } from 'typeorm';
 import { Server } from 'socket.io';
 import http from 'http';
@@ -11,18 +10,33 @@ import { createPrivateKey, createPublicKey } from 'crypto';
 import { UserInfo } from './types/UserInfo.js';
 import { ServerConfig } from './http/server-config.js';
 import { NonceGenerator } from './nonce.js';
+import { Hono } from 'hono';
+import { serve } from '@hono/node-server';
+import { readFile } from 'fs/promises';
 
-const app = express();
+const app = new Hono();
 
 // Initialize server
+const serveOptions = {
+    fetch: app.fetch,
+    port: Config.instance.server.port,
+    hostname: Config.instance.server.host
+};
 let server;
 if (Config.instance.server.ssl.enabled) {
-    server = https.createServer({
-        key: Config.instance.server.ssl.key,
-        cert: Config.instance.server.ssl.cert
-    }, app);
+    server = serve({
+        ...serveOptions,
+        createServer: https.createServer,
+        serverOptions: {
+            key: await readFile(Config.instance.server.ssl.key),
+            cert: await readFile(Config.instance.server.ssl.cert)
+        }
+    });
 } else {
-    server = http.createServer(app);
+    server = serve({
+        ...serveOptions,
+        createServer: http.createServer,
+    });
 }
 
 const io = new Server(server);
@@ -63,7 +77,7 @@ const jwt = new JwtHelper(
 );
 
 const config: ServerConfig = {
-    express: app,
+    hono: app,
     database: db,
     jwt: jwt,
     io: io,

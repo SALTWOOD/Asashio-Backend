@@ -1,14 +1,15 @@
 import { DataSource } from "typeorm";
 import JwtHelper from "./jwt.js";
-import { Request, Response } from "express";
+import { getCookie, setCookie } from 'hono/cookie';
 import { UserInfo } from "./types/UserInfo.js";
 import { Audience, RoleLevels, UserStatus } from "./types/Enums.js";
 import { Config } from "./config.js";
 import { Role } from "./types/Enums.js";
 import { AppError } from "./types/AppError.js";
+import { Context } from "hono";
 
-export function getToken(req: Request): string | null {
-    return req.cookies.token || null;
+export function getToken(c: Context): string | null {
+    return getCookie(c, 'token') ?? null;
 }
 
 /**
@@ -17,8 +18,8 @@ export function getToken(req: Request): string | null {
  * @param token 令牌
  * @param expiresInSeconds 过期时间，默认 3 天
  */
-export function applyToken(res: Response, token: string, expiresInSeconds: number = 60 * 60 * 24 * 3): void {
-    res.cookie('token', token, {
+export function applyToken(c: Context, token: string, expiresInSeconds: number = 60 * 60 * 24 * 3): void {
+    setCookie(c, 'token', token, {
         secure: Config.instance.server.ssl.enabled,
         expires: new Date(Date.now() + 1000 * expiresInSeconds),
     });
@@ -45,14 +46,14 @@ export function issueToken(jwt: JwtHelper, user: UserInfo, audience: Audience, e
  * @param expiresInSeconds 过期时间，默认 3 天
  * @returns 
  */
-export function createLoginToken(jwt: JwtHelper, res: Response, user: UserInfo, expiresInSeconds: number = 60 * 60 * 24 * 3): string {
+export function createLoginToken(jwt: JwtHelper, c: Context, user: UserInfo, expiresInSeconds: number = 60 * 60 * 24 * 3): string {
     const token = jwt.issueToken({ id: user.id }, Audience.USER, expiresInSeconds);
-    applyToken(res, token);
+    applyToken(c, token);
     return token;
 }
 
-export async function getUser(req: Request, jwt: JwtHelper, db: DataSource, ignoreStatus: boolean = false): Promise<UserInfo | null> {
-    const payload = jwt.verifyToken(getToken(req), Audience.USER) as { id: number };
+export async function getUser(c: Context, jwt: JwtHelper, db: DataSource, ignoreStatus: boolean = false): Promise<UserInfo | null> {
+    const payload = jwt.verifyToken(getToken(c), Audience.USER) as { id: number };
     if (!payload) return null;
     const user = await db.manager.findOne(UserInfo, {
         where: { id: payload.id }
