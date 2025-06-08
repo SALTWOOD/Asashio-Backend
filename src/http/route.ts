@@ -26,17 +26,21 @@ function errorHandler(error: Error, req: Request, res: Response, next: NextFunct
 
     // 统一响应格式
     res.status(statusCode).json({
-        message: error.message,
+        message: ReturnMessage.ERROR,
         data,
-        stack: sendStack ? error.stack : undefined
+        error: {
+            message: error.message,
+            stack: sendStack ? error.stack : undefined,
+        }
     });
 }
 
-function quick(res: Response, data: any, code: number = 200, message: ReturnMessage = ReturnMessage.SUCCESS): void {
+function quick(res: Response, data: any = null, code: number = 200, message: ReturnMessage = ReturnMessage.SUCCESS): void {
     res.status(code).json({
         message,
         code,
         data,
+        error: null,
     });
 }
 

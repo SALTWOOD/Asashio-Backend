@@ -5,6 +5,7 @@ import { UserInfo } from "./types/UserInfo.js";
 import { Audience, RoleLevels, UserStatus } from "./types/Enums.js";
 import { Config } from "./config.js";
 import { Role } from "./types/Enums.js";
+import { AppError } from "./types/AppError.js";
 
 export function getToken(req: Request): string | null {
     return req.cookies.token || null;
@@ -59,7 +60,7 @@ export async function getUser(req: Request, jwt: JwtHelper, db: DataSource, igno
     if (!user) return null;
     if (ignoreStatus) return user;
     if (user.status === UserStatus.DELETED) return null;
-    if (user.status === UserStatus.BANNED) throw new Error('User is banned');
+    if (user.status === UserStatus.BANNED) throw new AppError('User is banned', 403);
     return user;
 }
 
