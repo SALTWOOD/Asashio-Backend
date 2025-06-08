@@ -31,7 +31,8 @@ const db = new DataSource({
     username: Config.instance.database.username,
     password: Config.instance.database.password,
     database: 'asashio',
-    entities: [Setting, UserInfo]
+    entities: [Setting, UserInfo],
+    synchronize: Config.instance.database.synchronize as any
 });
 
 await db.initialize();
