@@ -22,3 +22,7 @@ services:
       POSTGRES_DB: asashio
     networks:
       - asashio-network
+
+networks:
+  asashio-network:
+    driver: bridge
