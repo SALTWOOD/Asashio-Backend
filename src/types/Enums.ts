@@ -6,7 +6,8 @@ export enum ReturnMessage {
     NOT_FOUND = 'Not Found',
     CONFLICT = 'Conflict',
     UNPROCESSABLE_ENTITY = 'Unprocessable Entity',
-    INTERNAL_SERVER_ERROR = 'Internal Server Error'
+    INTERNAL_SERVER_ERROR = 'Internal Server Error',
+    NOT_IMPLEMENTED = 'Not Implemented',
 }
 
 export enum Audience {

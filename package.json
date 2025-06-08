@@ -24,6 +24,7 @@
     "@tsconfig/node22": "^22.0.2",
     "@types/jsonwebtoken": "^9.0.9",
     "@types/node": "^22.15.29",
+    "bcrypt": "^6.0.0",
     "dotenv": "^16.5.0",
     "env-var": "^7.5.0",
     "express": "^5.1.0",
@@ -35,6 +36,7 @@
     "typescript": "^5.8.3"
   },
   "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
     "@types/express": "^5.0.2"
   }
 }
