@@ -10,29 +10,26 @@ import cookieParser from 'cookie-parser';
 import { ServerConfig } from './server-config.js';
 import { AppError } from '../types/AppError.js';
 
-function getErrorHandler(config: ServerConfig) {
-    return async (error: Error, req: Request, res: Response, next: NextFunction) => {
-        const isAppError = error instanceof AppError;
-        const statusCode = isAppError ? error.statusCode : 500;
-        const data = isAppError ? error.data : null;
+function errorHandler(error: Error, req: Request, res: Response, next: NextFunction): void {
+    const isAppError = error instanceof AppError;
+    const statusCode = isAppError ? error.statusCode : 500;
+    const data = isAppError ? error.data : null;
 
-        let sendStack = false;
-        // 都报错了还是保险些，加个 try
-        try {
-            const isDev = process.env.NODE_ENV === 'development';
-            const isAdmin = hasPermission(await getUser(req, config.jwt, config.database), Role.ADMIN);
-            if (isDev || isAdmin) sendStack = true;
-        } catch (e) {
-            sendStack = false;
-        }
+    let sendStack = false;
+    // 都报错了还是保险些，加个 try
+    try {
+        const isDev = process.env.NODE_ENV === 'development';
+        if (isDev) sendStack = true;
+    } catch (e) {
+        sendStack = false;
+    }
 
-        // 统一响应格式
-        res.status(statusCode).json({
-            message: error.message,
-            data,
-            stack: sendStack ? error.stack : undefined
-        });
-    };
+    // 统一响应格式
+    res.status(statusCode).json({
+        message: error.message,
+        data,
+        stack: sendStack ? error.stack : undefined
+    });
 }
 
 function quick(res: Response, data: any, code: number = 200, message: ReturnMessage = ReturnMessage.SUCCESS): void {
@@ -132,5 +129,5 @@ export function initRoutes(config: ServerConfig) {
         });
     });
 
-    app.use(getErrorHandler(config));
+    app.use(errorHandler);
 }
