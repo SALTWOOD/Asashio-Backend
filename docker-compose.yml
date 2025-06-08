@@ -1,0 +1,25 @@
+services:
+  asashio-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+    env_file:
+      - .env
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    depends_on:
+      - asashio-db
+    networks:
+      - asashio-network
+  asashio-db:
+    image: postgres:14.1
+    volumes:
+      - ./db:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: asashio
+      POSTGRES_PASSWORD: asashio
+      POSTGRES_DB: asashio
+    networks:
+      - asashio-network
