@@ -35,6 +35,14 @@ function getErrorHandler(config: ServerConfig) {
     };
 }
 
+function quick(res: Response, data: any, code: number = 200, message: ReturnMessage = ReturnMessage.SUCCESS): void {
+    res.status(code).json({
+        message,
+        code,
+        data,
+    });
+}
+
 export function initRoutes(config: ServerConfig) {
     const app = config.express;
     const db = config.database;
@@ -51,7 +59,7 @@ export function initRoutes(config: ServerConfig) {
     app.get('/api/v1/user/info', async (req: Request, res: Response) => {
         const user = await getUser(req, jwt, db);
         if (!user) {
-            res.status(401).json({ message: 'Unauthorized' });
+            quick(res, null, 401, ReturnMessage.UNAUTHORIZED);
             return;
         }
         res.json({
@@ -66,19 +74,16 @@ export function initRoutes(config: ServerConfig) {
             where: { username }
         });
         if (!user) {
-            res.status(401).json({ message: 'Unauthorized' });
+            quick(res, null, 401, ReturnMessage.UNAUTHORIZED);
             return;
         }
         if (await compare(password, user.pwd_hash)) {
             const token = issueToken(jwt, user, Audience.USER);
             applyToken(res, token);
-            res.json({
-                data: { token },
-                message: ReturnMessage.SUCCESS
-            });
+            quick(res, { token });
             return;
         } else {
-            res.status(401).json({ message: 'Unauthorized' });
+            quick(res, null, 401, ReturnMessage.UNAUTHORIZED);
             return;
         }
     });
@@ -89,35 +94,30 @@ export function initRoutes(config: ServerConfig) {
             where: { username }
         });
         if (user) {
-            res.status(409).json({ message: 'Conflict' });
+            quick(res, null, 409, ReturnMessage.CONFLICT);
             return;
         }
         const newUser = await db.manager.save(UserInfo, await UserInfo.create(username, email, password));
         const token = issueToken(jwt, newUser, Audience.USER);
         applyToken(res, token);
-        res.json({
-            data: { token },
-            message: ReturnMessage.SUCCESS
-        });
+        quick(res, { token });
     });
 
     app.post('/api/v1/user/delete', async (req: Request, res: Response) => {
         const user = await getUser(req, jwt, db);
         if (!user) {
-            res.status(401).json({ message: ReturnMessage.UNAUTHORIZED });
+            quick(res, null, 401, ReturnMessage.UNAUTHORIZED);
             return;
         }
-        if (!req.body.nonce) {
+        const { nonce } = req.body;
+        if (!nonce) {
             let nonce = config.nonce_generators.deletion.find(nonce => nonce.userId === user.id)?.[0];
             if (!nonce) {
                 nonce = config.nonce_generators.deletion.generate({ userId: user.id });
             }
-            res.status(200).json({
-                message: ReturnMessage.SUCCESS,
-                data: {
-                    success: false,
-                    nonce
-                }
+            quick(res, {
+                success: false,
+                nonce
             });
             return;
         }
@@ -125,9 +125,10 @@ export function initRoutes(config: ServerConfig) {
         // 暂时将账户的状态设为删除但不实际删除数据
         user.status = UserStatus.DELETED;
         await db.manager.save(UserInfo, user);
-        res.json({
-            message: ReturnMessage.SUCCESS,
-            data: user
+        config.nonce_generators.deletion.delete(nonce);
+        quick(res, {
+            success: true,
+            user
         });
     });
 
