@@ -43,6 +43,13 @@ export function initRoutes(config: ServerConfig) {
         return c.json(getOidcOptions(Config.instance.server.baseUrl));
     });
 
+    app.get('/api/v1/status', async (c) => {
+        return quick(c, {
+            status: 'ok',
+            time: new Date(),
+        });
+    });
+
     app.get('/api/v1/user/info', async (c) => {
         const user = await getUser(c, jwt, db);
         if (!user) return quick(c, null, 401, ReturnMessage.UNAUTHORIZED);
