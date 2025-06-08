@@ -27,7 +27,7 @@ export const RoleLevels: Record<Role, number> = {
 };
 
 export enum UserStatus {
-    DELETED = 0,
-    NORMAL = 1,
+    NORMAL = 0,
+    DELETED = 1,
     BANNED = 2
 };
