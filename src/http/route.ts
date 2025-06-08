@@ -9,10 +9,12 @@ import { Audience, ReturnMessage } from '../types/Enums.js';
 import JwtHelper from '../jwt.js';
 import { compare, hash } from 'bcrypt';
 import { UserInfo } from '../types/UserInfo.js';
+import cookieParser from 'cookie-parser';
 
 export function initRoutes(app: express.Application, io: Server, db: DataSource, jwt: JwtHelper) {
     app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
+    app.use(cookieParser());
 
     app.get('/.well-known/openid-configuration', (req: Request, res: Response) => {
         res.json(getOidcOptions(Config.instance.server.baseUrl));
