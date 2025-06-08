@@ -10,7 +10,7 @@ import {
 @Entity()
 export class Setting {
     @PrimaryGeneratedColumn()
-    public readonly id: string;
+    public readonly id!: number;
 
     @Column()
     @Index({ unique: true })
@@ -20,7 +20,6 @@ export class Setting {
     public value: string;
 
     constructor(key: string, value: string) {
-        this.id = randomUUID();
         this.key = key;
         this.value = value;
     }

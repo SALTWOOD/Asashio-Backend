@@ -4,7 +4,7 @@ import type { Role } from "./Role.js";
 @Entity()
 export class UserInfo {
     @PrimaryGeneratedColumn()
-    public id: number = 0;
+    public id!: number;
 
     @Column()
     public username: string = '';
