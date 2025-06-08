@@ -26,7 +26,6 @@
     "@types/jsonwebtoken": "^9.0.9",
     "@types/node": "^22.15.29",
     "bcrypt": "^6.0.0",
-    "cookie-parser": "^1.4.7",
     "dotenv": "^16.5.0",
     "env-var": "^7.5.0",
     "hono": "^4.7.11",
