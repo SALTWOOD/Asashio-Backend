@@ -21,11 +21,7 @@ export class UserInfo {
 
     // 使用 JSON 类型并添加转换器
     @Column({
-        type: 'json',
-        transformer: {
-            to: (value: TwoFactorAuth) => JSON.stringify(value),
-            from: (value: string) => JSON.parse(value)
-        }
+        type: 'json'
     })
     public two_factor: TwoFactorAuth = {
         enabled: false,
