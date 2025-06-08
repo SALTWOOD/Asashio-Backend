@@ -27,7 +27,7 @@ class JwtHelper {
     }
 
     // 验证JWT
-    public verifyToken(token: string | undefined, audience: string | null = null): object | null {
+    public verifyToken(token: string | null, audience: string | null = null): object | null {
         try {
             if (!token) return null;
 

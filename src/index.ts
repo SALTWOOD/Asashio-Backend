@@ -1,10 +1,13 @@
 import express from 'express';
-import { DataSource } from 'typeorm';
+import { DataSource, In } from 'typeorm';
 import { Server } from 'socket.io';
 import http from 'http';
 import https from 'https';
 import { initRoutes } from './http/route.js';
 import { Config } from './config.js';
+import { Setting } from './types/Setting.js';
+import JwtHelper from './jwt.js';
+import { createPrivateKey, createPublicKey, KeyObject } from 'crypto';
 
 const app = express();
 
@@ -30,9 +33,32 @@ const db = new DataSource({
     entities: []
 });
 
-// await db.initialize();
+await db.initialize();
 
-initRoutes(app, io, db);
+let [priKey, pubKey] = await Promise.all([
+    db.manager.findOneBy(Setting, { key: 'jwt.private' }),
+    db.manager.findOneBy(Setting, { key: 'jwt.public' })
+]);
+
+if (!priKey || !pubKey) {
+    const keyPair = JwtHelper.generateKeys();
+    priKey = new Setting('jwt.private', keyPair.privateKey.export({ type: 'pkcs1', format: 'pem' }).toString());
+    pubKey = new Setting('jwt.public', keyPair.publicKey.export({ type: 'pkcs1', format: 'pem' }).toString());
+
+    await db.manager.transaction(async manager => {
+        await manager.delete(Setting, {
+            key: In(['jwt.private', 'jwt.public'])
+        });
+        await manager.save([priKey, pubKey]);
+    });
+}
+
+const jwt = new JwtHelper(
+    createPrivateKey(priKey.value),
+    createPublicKey(pubKey.value)
+);
+
+initRoutes(app, io, db, jwt);
 
 server.listen(Config.instance.server.port, Config.instance.server.host, () => {
     console.log(`Server running at http${Config.instance.server.ssl.enabled ? 's' : ''}://${Config.instance.server.host}:${Config.instance.server.port}`);
