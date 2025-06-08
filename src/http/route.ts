@@ -15,22 +15,13 @@ function errorHandler(error: Error, req: Request, res: Response, next: NextFunct
     const statusCode = isAppError ? error.statusCode : 500;
     const data = isAppError ? error.data : null;
 
-    let sendStack = false;
-    // 都报错了还是保险些，加个 try
-    try {
-        const isDev = process.env.NODE_ENV === 'development';
-        if (isDev) sendStack = true;
-    } catch (e) {
-        sendStack = false;
-    }
-
     // 统一响应格式
     res.status(statusCode).json({
         message: ReturnMessage.ERROR,
         data,
         error: {
             message: error.message,
-            stack: sendStack ? error.stack : undefined,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined,
         }
     });
 }
