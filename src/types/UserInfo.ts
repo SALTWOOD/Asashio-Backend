@@ -50,6 +50,21 @@ export class UserInfo {
         const hashedPassword = hashSync(password, 10);
         return new UserInfo(username, email, hashedPassword);
     }
+
+    /**
+     * 筛去部分敏感信息，然后返回 JSON 对象。
+     * @param isPublic 指示该 JSON 是否对外显示。设定为 true 时将会隐藏更多信息。
+     */
+    public toJson(isPublic: boolean = false): any {
+        const hideFunc = ({ two_factor, pwd_hash, ...rest }: UserInfo) => ({
+            ...rest,
+            two_factor: this.two_factor.enabled
+        });
+        const publicHideFunc = ({ email, status, ...rest }: UserInfo) => (rest);
+        // 反正只是藏些数据，这样转型没问题的啦~
+        const hidden = hideFunc(this) as unknown as UserInfo;
+        return isPublic ? publicHideFunc(hidden) : hidden;
+    }
 }
 
 export interface TwoFactorAuth {

@@ -55,7 +55,7 @@ export function initRoutes(config: ServerConfig) {
             return;
         }
         res.json({
-            data: user,
+            data: user.toJson(),
             message: ReturnMessage.SUCCESS
         });
     });
@@ -120,7 +120,7 @@ export function initRoutes(config: ServerConfig) {
         config.nonce_generators.deletion.delete(nonce);
         quick(res, {
             success: true,
-            user
+            user: user.toJson()
         });
     });
 
