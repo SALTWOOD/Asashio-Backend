@@ -6,6 +6,8 @@ import { Config } from '../config.js';
 import { Request, Response, NextFunction } from 'express';
 import { UserInfo } from '../types/UserInfo.js';
 import { getUser } from '../utils.js';
+import { ReturnMessage } from '../types/Enums.js';
+import JwtHelper from '../jwt.js';
 
 export function initRoutes(app: express.Application, io: Server, db: DataSource, jwt: JwtHelper) {
     app.use(express.json());
@@ -21,6 +23,9 @@ export function initRoutes(app: express.Application, io: Server, db: DataSource,
             res.status(401).json({ message: 'Unauthorized' });
             return;
         }
-        res.json(user);
+        res.json({
+            data: user,
+            message: ReturnMessage.SUCCESS
+        });
     });
 }

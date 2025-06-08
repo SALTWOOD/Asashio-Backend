@@ -2,10 +2,7 @@ import { DataSource } from "typeorm";
 import JwtHelper from "./jwt.js";
 import { Request } from "express";
 import { UserInfo } from "./types/UserInfo.js";
-
-export enum Audience {
-    USER = 'user-token'
-}
+import { Audience } from "./types/Enums.js";
 
 export function getToken(req: Request): string | null {
     return req.cookies.token || null;
