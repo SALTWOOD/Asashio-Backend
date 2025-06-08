@@ -8,6 +8,7 @@ import { Config } from './config.js';
 import { Setting } from './types/Setting.js';
 import JwtHelper from './jwt.js';
 import { createPrivateKey, createPublicKey, KeyObject } from 'crypto';
+import { UserInfo } from './types/UserInfo.js';
 
 const app = express();
 
@@ -24,13 +25,13 @@ if (Config.instance.server.ssl.enabled) {
 
 const io = new Server(server);
 const db = new DataSource({
-    type: 'mysql',
-    host: 'localhost',
-    port: 3306,
-    username: 'mysql',
-    password: 'mysql',
+    type: Config.instance.database.type as any,
+    host: Config.instance.database.host,
+    port: Config.instance.database.port,
+    username: Config.instance.database.username,
+    password: Config.instance.database.password,
     database: 'asashio',
-    entities: []
+    entities: [Setting, UserInfo]
 });
 
 await db.initialize();

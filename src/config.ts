@@ -33,7 +33,7 @@ export class Config {
         port: env.get('DB_PORT').default(5432).asPortNumber(),
         username: env.get('DB_USERNAME').default('postgres').asString(),
         password: env.get('DB_PASSWORD').default('postgres').asString(),
-        database: env.get('DB_DATABASE').default('postgres').asString()
+        database: env.get('DB_DATABASE').default('asashio').asString()
     };
 }
 
