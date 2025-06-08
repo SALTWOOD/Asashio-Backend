@@ -11,7 +11,11 @@ import { compare, hash } from 'bcrypt';
 import { UserInfo } from '../types/UserInfo.js';
 import cookieParser from 'cookie-parser';
 
-export function initRoutes(app: express.Application, io: Server, db: DataSource, jwt: JwtHelper) {
+export function initRoutes(config: ServerConfig) {
+    const app = config.express;
+    const db = config.database;
+    const jwt = config.jwt;
+
     app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
     app.use(cookieParser());
@@ -72,4 +76,36 @@ export function initRoutes(app: express.Application, io: Server, db: DataSource,
             message: ReturnMessage.SUCCESS
         });
     });
+
+    app.post('/api/v1/user/delete', async (req: Request, res: Response) => {
+        const user = await getUser(req, jwt, db);
+        if (!user) {
+            res.status(401).json({ message: ReturnMessage.UNAUTHORIZED });
+            return;
+        }
+        if (!req.body.nonce) {
+            let nonce = config.nonce_generators.deletion.find(nonce => nonce.userId === user.id)?.[0];
+            if (!nonce) {
+                nonce = config.nonce_generators.deletion.generate({ userId: user.id });
+            }
+            res.status(200).json({
+                message: ReturnMessage.SUCCESS,
+                data: {
+                    success: false,
+                    nonce
+                }
+            });
+            return;
+        }
+        // await db.manager.delete(UserInfo, user.id);
+        // 暂时将账户的状态设为删除但不实际删除数据
+        user.status = UserStatus.DELETED;
+        await db.manager.save(UserInfo, user);
+        res.json({
+            message: ReturnMessage.SUCCESS,
+            data: user
+        });
+    });
+
+    app.use(getErrorHandler(config));
 }

@@ -60,7 +60,17 @@ const jwt = new JwtHelper(
     createPublicKey(pubKey.value)
 );
 
-initRoutes(app, io, db, jwt);
+const config: ServerConfig = {
+    express: app,
+    database: db,
+    jwt: jwt,
+    io: io,
+    nonce_generators: {
+        deletion: new NonceGenerator<{ userId: number }>()
+    }
+};
+
+initRoutes(config);
 
 server.listen(Config.instance.server.port, Config.instance.server.host, () => {
     console.log(`Server running at http${Config.instance.server.ssl.enabled ? 's' : ''}://${Config.instance.server.host}:${Config.instance.server.port}`);
