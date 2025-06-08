@@ -8,7 +8,6 @@ import {
 } from "typeorm";
 
 @Entity()
-@Unique(["key"])
 export class Setting {
     @PrimaryGeneratedColumn()
     public readonly id: string;
