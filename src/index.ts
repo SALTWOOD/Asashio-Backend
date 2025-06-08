@@ -38,7 +38,7 @@ if (Config.instance.server.ssl.enabled) {
         createServer: http.createServer,
     });
 }
-console.log(`Server running at http${Config.instance.server.ssl.enabled ? 's' : ''}://${Config.instance.server.host ?? 'localhost'}:${Config.instance.server.port}`);
+console.log(`Server running at http${Config.instance.server.ssl.enabled ? 's' : ''}://${Config.instance.server.host || 'localhost'}:${Config.instance.server.port}`);
 
 const io = new Server(server);
 const db = new DataSource({
