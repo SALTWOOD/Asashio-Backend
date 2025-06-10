@@ -16,13 +16,14 @@ import { readFile } from 'fs/promises';
 
 const app = new Hono();
 
-// Initialize server
+// 初始化服务器
 const serveOptions = {
     fetch: app.fetch,
     port: Config.instance.server.port,
     hostname: Config.instance.server.host
 };
 let server;
+// 是否启用 SSL
 if (Config.instance.server.ssl.enabled) {
     server = serve({
         ...serveOptions,
@@ -40,7 +41,9 @@ if (Config.instance.server.ssl.enabled) {
 }
 console.log(`Server running at http${Config.instance.server.ssl.enabled ? 's' : ''}://${Config.instance.server.host || '0.0.0.0'}:${Config.instance.server.port}`);
 
+// Socket.IO
 const io = new Server(server);
+// 数据库
 const db = new DataSource({
     type: Config.instance.database.type as any,
     host: Config.instance.database.host,
@@ -54,6 +57,7 @@ const db = new DataSource({
 
 await db.initialize();
 
+// 读取 JWT 密钥，没有就生成然后写入
 let [priKey, pubKey] = await Promise.all([
     db.manager.findOneBy(Setting, { key: 'jwt.private' }),
     db.manager.findOneBy(Setting, { key: 'jwt.public' })
@@ -77,6 +81,7 @@ const jwt = new JwtHelper(
     createPublicKey(pubKey.value)
 );
 
+// 一堆奇怪的数据
 const config: ServerConfig = {
     hono: app,
     database: db,

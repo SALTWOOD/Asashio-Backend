@@ -41,10 +41,10 @@ export function issueToken(jwt: JwtHelper, user: UserInfo, audience: Audience, e
 /**
  * 一键生成并返回登录 token
  * @param jwt 传入一个 JwtHelper 实例
- * @param res 响应对象
+ * @param c 响应对象
  * @param user 用户实例
  * @param expiresInSeconds 过期时间，默认 3 天
- * @returns 
+ * @returns token
  */
 export function createLoginToken(jwt: JwtHelper, c: Context, user: UserInfo, expiresInSeconds: number = 60 * 60 * 24 * 3): string {
     const token = jwt.issueToken({ id: user.id }, Audience.USER, expiresInSeconds);
@@ -52,6 +52,14 @@ export function createLoginToken(jwt: JwtHelper, c: Context, user: UserInfo, exp
     return token;
 }
 
+/**
+ * 获取用户
+ * @param c 响应对象
+ * @param jwt 传入一个 JwtHelper 实例
+ * @param db 数据库
+ * @param ignoreStatus 忽略状态
+ * @returns 用户信息
+ */
 export async function getUser(c: Context, jwt: JwtHelper, db: DataSource, ignoreStatus: boolean = false): Promise<UserInfo | null> {
     const payload = jwt.verifyToken(getToken(c), Audience.USER) as { id: number };
     if (!payload) return null;
@@ -60,7 +68,9 @@ export async function getUser(c: Context, jwt: JwtHelper, db: DataSource, ignore
     });
     if (!user) return null;
     if (ignoreStatus) return user;
+    // 被删了就返回 null
     if (user.status === UserStatus.DELETED) return null;
+    // 被夹了就爆炸
     if (user.status === UserStatus.BANNED) throw new AppError('User is banned', 403);
     return user;
 }
