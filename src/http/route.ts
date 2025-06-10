@@ -13,6 +13,8 @@ export function initRoutes(config: ServerConfig) {
     const db = config.database;
     const jwt = config.jwt;
 
+    const base = app.basePath('/api/v1');
+
     const quick = (c: any, data: any = null, code = 200, message = ReturnMessage.SUCCESS) =>
         c.json({ message, code, data, error: null }, code);
 
@@ -43,20 +45,20 @@ export function initRoutes(config: ServerConfig) {
         return c.json(getOidcOptions(Config.instance.server.baseUrl));
     });
 
-    app.get('/api/v1/status', async (c) => {
+    base.get('/status', async (c) => {
         return quick(c, {
             status: 'ok',
             time: new Date(),
         });
     });
 
-    app.get('/api/v1/user/info', async (c) => {
+    base.get('/user/info', async (c) => {
         const user = await getUser(c, jwt, db);
         if (!user) return quick(c, null, 401, ReturnMessage.UNAUTHORIZED);
         return quick(c, user.toJson());
     });
 
-    app.post('/api/v1/user/login', async (c) => {
+    base.post('/user/login', async (c) => {
         const { username, password } = await c.req.json();
         const user = await db.manager.findOne(UserInfo, { where: { username } });
         if (!user || !(await compare(password, user.pwd_hash))) {
@@ -68,7 +70,7 @@ export function initRoutes(config: ServerConfig) {
         return quick(c, { token });
     });
 
-    app.post('/api/v1/user/register', async (c) => {
+    base.post('/user/register', async (c) => {
         const { username, email, password } = await c.req.json();
         const existing = await db.manager.findOne(UserInfo, { where: { username } });
         if (existing) return quick(c, null, 409, ReturnMessage.CONFLICT);
@@ -80,7 +82,7 @@ export function initRoutes(config: ServerConfig) {
         return quick(c, { token });
     });
 
-    app.post('/api/v1/user/delete', async (c) => {
+    base.post('/user/delete', async (c) => {
         const { nonce } = await c.req.json();
         const user = await getUser(c, jwt, db);
         if (!user) return quick(c, null, 401, ReturnMessage.UNAUTHORIZED);
